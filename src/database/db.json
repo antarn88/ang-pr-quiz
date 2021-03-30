@@ -1,5 +1,64 @@
 {
-  "students": [],
-  "quizzes": [],
-  "questions": []
+  "students": [
+    {
+      "id": 1,
+      "name": "Teszt Elek",
+      "email": "teszt@elek.hu",
+      "points": 0,
+      "active": true
+    },
+    {
+      "id": 2,
+      "name": "Végh Béla",
+      "email": "bela@gmail.hu",
+      "points": 0,
+      "active": true
+    },
+    {
+      "id": 3,
+      "name": "John Doe",
+      "email": "john@doe.com",
+      "points": 10,
+      "active": false
+    }
+  ],
+  "quizzes": [
+    {
+      "id": 1,
+      "title": "Első quiz",
+      "description": "Ez az első quiz...",
+      "questions": [],
+      "active": true
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "question": "Mi Magyarország fővárosa?",
+      "answers": [
+        {
+          "id": 1,
+          "content": "Pécs",
+          "correct": false
+        },
+        {
+          "id": 2,
+          "content": "Budapest",
+          "correct": true
+        },
+        {
+          "id": 3,
+          "content": "Felcsút",
+          "correct": false
+        },
+        {
+          "id": 4,
+          "content": "Sopron",
+          "correct": false
+        }
+      ],
+      "points": 1,
+      "active": true
+    }
+  ]
 }
