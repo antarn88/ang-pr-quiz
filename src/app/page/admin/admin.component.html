@@ -1,1 +1,44 @@
-<p>admin works!</p>
+<div class="row" *ngIf="(quizList$ | async)?.length">
+  <div class="col-4 offset-4 my-5">
+    <input type="text" class="form-control" placeholder="Search" (keyup)="onChangePhrase($event)">
+  </div>
+  <button class="btn btn-primary btn-block btn-lg mb-5" [routerLink]="['quiz/' + 0]">Create a new quiz</button>
+  <table class="table table-striped table-responsive mb-5">
+    <thead>
+      <tr>
+        <th (click)="onClickTableHeader('id')">#</th>
+        <th (click)="onClickTableHeader('title')">Title</th>
+        <th (click)="onClickTableHeader('description')">Description</th>
+        <th (click)="onClickTableHeader('questions')">Questions</th>
+        <th (click)="onClickTableHeader('active')">Active</th>
+        <th>Operations</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let quiz of quizList$ | async | quizQuestionsBinding">
+        <td>{{ quiz.id }}</td>
+        <td>{{ quiz.title }}</td>
+        <td>{{ quiz.description }}</td>
+        <td>
+          <li *ngFor="let questionId of quiz.questions">
+            <span>{{ questionId }}</span>
+          </li>
+        </td>
+        <td>
+          <div *ngIf="quiz.active" style="text-align: center;"><i class="fa fa-check"></i></div>
+          <div *ngIf="!quiz.active" style="text-align: center;"><i class="fa fa-times"></i></div>
+        </td>
+        <td>
+          <div class="btn-group">
+            <button class="btn btn-secondary" (click)="onClickEdit(quiz)">
+              <i class="fa fa-edit"></i>
+            </button>
+            <button class="btn btn-danger" (click)="onClickDelete(quiz.id || 0)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

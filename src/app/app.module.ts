@@ -11,6 +11,9 @@ import { QuestionEditorComponent } from './page/question-editor/question-editor.
 import { QuizComponent } from './page/quiz/quiz.component';
 import { HomeComponent } from './page/home/home.component';
 import { NavigationComponent } from './widget/navigation/navigation.component';
+import { FilterPipe } from './pipe/filter.pipe';
+import { SorterPipe } from './pipe/sorter.pipe';
+import { QuizQuestionsBindingPipe } from './pipe/quiz-questions-binding.pipe';
 
 @NgModule({
   declarations: [
@@ -20,7 +23,10 @@ import { NavigationComponent } from './widget/navigation/navigation.component';
     QuestionEditorComponent,
     QuizComponent,
     HomeComponent,
-    NavigationComponent
+    NavigationComponent,
+    FilterPipe,
+    SorterPipe,
+    QuizQuestionsBindingPipe
   ],
   imports: [
     BrowserModule,
