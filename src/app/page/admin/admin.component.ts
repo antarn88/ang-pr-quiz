@@ -13,6 +13,9 @@ export class AdminComponent implements OnInit {
 
   quizList$: BehaviorSubject<Quiz[]> = this.quizService.list$;
   phrase: string = '';
+  clickedColumn = 'id';
+  sortingDirection = 'ASC';
+  firstSorting = true;
 
   constructor(
     private quizService: QuizService,
@@ -26,7 +29,13 @@ export class AdminComponent implements OnInit {
   onClickEdit(quiz: Quiz): void {
   }
 
-  onClickDelete(id: Number): void {
+  onClickDelete(id: number): void {
+    if (confirm(`Are you sure to delete this quiz with: ${id} ID?`)) {
+      this.quizService.remove(id).subscribe(
+        () => this.quizService.getAll(),
+        () => console.error("Error during delete quiz!")
+      );
+    } 
   }
 
   onClickCreate(): void {
@@ -37,6 +46,12 @@ export class AdminComponent implements OnInit {
   }
 
   onClickTableHeader(columnName: string): void {
+    this.clickedColumn = columnName;
+    if (this.firstSorting) {
+      this.sortingDirection = 'DESC';
+      this.firstSorting = false;
+    } 
+    else this.sortingDirection = this.sortingDirection === 'ASC' ? 'DESC' : 'ASC';
   }
 
 }

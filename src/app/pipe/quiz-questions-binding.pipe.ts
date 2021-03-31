@@ -10,12 +10,11 @@ export class QuizQuestionsBindingPipe implements PipeTransform {
   constructor(private questionService: QuestionService) { }
 
   transform(quizzes: Quiz[] | null): Quiz[] | null {
-    const questionsAsString: string[] = [];
     if (quizzes) {
       quizzes.map(quiz => {
-        quiz.questions.map(question => this.questionService.get(question).subscribe(
-          questionObj => questionsAsString.push(questionObj.question)));
-        quiz.questions = questionsAsString;
+        quiz.questions.map((question, index) => this.questionService.get(question).subscribe(questionObj => {
+          quiz.questions[index] = questionObj.question;
+        }));
       });
     }
     return quizzes;

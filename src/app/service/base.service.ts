@@ -39,6 +39,6 @@ export class BaseService<T extends { id: number }> {
   }
 
   remove(id: number): Observable<T> {
-    return this.http.delete<T>(`${this.serverAddress}/${id}`);
+    return this.http.delete<T>(`${this.serverAddress}/${this.entityName}/${id}`);
   }
 }
