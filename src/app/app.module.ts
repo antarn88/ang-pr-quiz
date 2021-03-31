@@ -14,6 +14,7 @@ import { NavigationComponent } from './widget/navigation/navigation.component';
 import { FilterPipe } from './pipe/filter.pipe';
 import { SorterPipe } from './pipe/sorter.pipe';
 import { QuizQuestionsBindingPipe } from './pipe/quiz-questions-binding.pipe';
+import { QuestionIdArrayToQuestionArrayPipe } from './pipe/question-id-array-to-question-array.pipe';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { QuizQuestionsBindingPipe } from './pipe/quiz-questions-binding.pipe';
     NavigationComponent,
     FilterPipe,
     SorterPipe,
-    QuizQuestionsBindingPipe
+    QuizQuestionsBindingPipe,
+    QuestionIdArrayToQuestionArrayPipe
   ],
   imports: [
     BrowserModule,

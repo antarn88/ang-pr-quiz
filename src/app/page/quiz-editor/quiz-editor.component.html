@@ -1,1 +1,63 @@
-<p>quiz-editor works!</p>
+<div class="row">
+  <div class="col-6 offset-3 mt-5">
+    <form #quizForm="ngForm" (ngSubmit)="setQuizToDatabase(quiz)">
+      <div class="form-group mb-3">
+        <label for="title"><b>Title:</b></label>
+        <input name="title" id="title" type="text" class="form-control" [(ngModel)]="quiz.title" required autofocus>
+      </div>
+      <div class="form-group">
+        <label for="description"><b>Description:</b></label>
+        <textarea name="description" id="description" type="text" class="form-control" rows="4"
+          [(ngModel)]="quiz.description" required></textarea>
+      </div>
+      <div class="accordion my-3">
+        <label for="list"><b>Questions:</b></label>
+        <div *ngIf="!quiz.questions.length" class="text-center mb-4">There are no questions yet.</div>
+        <div class="card" *ngFor="let question of quiz.questions | questionIdArrayToQuestionArray">
+          <div class="card-header">
+            <h2 class="mb-0 d-flex">
+              <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target=""
+                [attr.data-target]="'#question-'+ question.id">
+                {{ question.question }}
+              </button>
+              <div class="btn-group">
+                <button class="btn bg-secondary btn-sm text-light" [routerLink]="['question/' + question.id]"><i
+                    class="fa fa-edit"></i></button>
+                <button class="btn bg-danger btn-sm text-light" type="button" (click)="deleteQuestion(question.id)"><i
+                    class="fa fa-trash"></i></button>
+              </div>
+            </h2>
+          </div>
+          <div id="question-{{question.id}}" class="collapse">
+            <div class="card-body">
+              <ul>
+                <span *ngFor="let answer of question.answers">
+                  <li>
+                    <span>{{answer.content}}</span>
+                    <span *ngIf="answer.correct" class="text-success"> (correct)</span>
+                    <span *ngIf="!answer.correct" class="text-danger"> (incorrect)</span>
+                  </li>
+                </span>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="text-center">
+        <button class="btn bg-success btn-sm text-light mb-3" [routerLink]="['question/' + 0]"><i
+            class="fa fa-plus"></i>
+          New Question</button>
+      </div>
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" name="active" id="active" [(ngModel)]="quiz.active">
+        <label class="form-check-label" for="active"><b>Active</b></label>
+      </div>
+      <div class="d-flex">
+        <button class="btn btn-secondary btn-block w-50 mr-1" (click)="backToTheQuizList()"><i
+            class="fa fa-arrow-left"></i> Back to the quiz list</button>
+        <button [disabled]="quizForm.invalid" type="submit" class="btn btn-primary w-50"><i class="fa fa-save"></i>
+          Save</button>
+      </div>
+    </form>
+  </div>
+</div>

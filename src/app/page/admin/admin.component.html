@@ -15,7 +15,8 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let quiz of quizList$ | async | quizQuestionsBinding | filter:'title':phrase | sorter:clickedColumn:sortingDirection">
+      <tr
+        *ngFor="let quiz of quizList$ | async | quizQuestionsBinding | filter:'title':phrase | sorter:clickedColumn:sortingDirection">
         <td>{{ quiz.id }}</td>
         <td>{{ quiz.title }}</td>
         <td>{{ quiz.description }}</td>

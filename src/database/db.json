@@ -37,7 +37,9 @@
       "id": 2,
       "title": "Matematikai quiz",
       "description": "Alap matematikai dolgok quiz...",
-      "questions": [3],
+      "questions": [
+        3
+      ],
       "active": false
     }
   ],
