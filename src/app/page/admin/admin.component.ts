@@ -34,17 +34,23 @@ export class AdminComponent implements OnInit {
     if (confirm(`Are you sure to delete this quiz with: ${id} ID?`)) {
       this.quizService.get(id).subscribe(
         quiz => {
+          this.deletingQuestions = [];
           this.deletingQuestions = quiz.questions;
           this.deletingQuestions.forEach(questionId => {
-            this.questionService.remove(questionId).subscribe();
+            this.questionService.remove(questionId).subscribe(
+              () =>
+              () => console.error('Error during deleting question!')
+            );
           });
         }
       );
       this.quizService.remove(id).subscribe(
-        () => this.quizService.getAll(),
+        () => {
+          this.quizService.getAll();
+          this.deletingQuestions = [];
+        },
         () => console.error("Error during delete quiz!")
       );
-      this.deletingQuestions = [];
     }
   }
 

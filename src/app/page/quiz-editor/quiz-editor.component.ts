@@ -53,11 +53,20 @@ export class QuizEditorComponent implements OnInit {
       () => {
         if (this.deletingQuestions.length) {
           this.deletingQuestions.forEach(deletingQuestionId => {
-            this.questionService.remove(deletingQuestionId).subscribe();
+            this.questionService.get(deletingQuestionId).subscribe(
+              () => {
+                this.questionService.remove(deletingQuestionId).subscribe(
+                  () =>
+                    () => console.error('Error during deleting question!')
+                );
+              },
+              () => console.error('You want to delete a question that does not exist!')
+            );
           });
         }
         this.backToTheQuizList();
-      }
+      },
+      () => console.error('Error during updating quiz!')
     );
   }
 
