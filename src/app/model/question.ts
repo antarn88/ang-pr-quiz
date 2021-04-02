@@ -5,5 +5,5 @@ export class Question {
   question: string = '';
   answers: Answer[] = [];
   points: number = 1;
-  active: boolean = false;
+  active: boolean = true;
 }

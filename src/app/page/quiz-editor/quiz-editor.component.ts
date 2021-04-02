@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Question } from 'src/app/model/question';
 import { Quiz } from 'src/app/model/quiz';
 import { QuestionService } from 'src/app/service/question.service';
 import { QuizService } from 'src/app/service/quiz.service';
@@ -19,8 +20,10 @@ export class QuizEditorComponent implements OnInit {
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private quizService: QuizService,
-    private questionService: QuestionService
-  ) { }
+    private questionService: QuestionService,
+  ) {
+    this.receiveIncomingQuestion();
+  }
 
   ngOnInit(): void {
     this.activatedRoute.params.subscribe(params => this.quizId = Number(params.id));
@@ -67,6 +70,44 @@ export class QuizEditorComponent implements OnInit {
         this.backToTheQuizList();
       },
       () => console.error('Error during updating quiz!')
+    );
+  }
+
+  receiveIncomingQuestion(): void {
+    const navigation = this.router.getCurrentNavigation();
+    const incomingQuestion = navigation?.extras.state as Question;
+    if (incomingQuestion?.question) {
+      if (incomingQuestion.id === 0) {
+        this.insertQuestionToDatabase(incomingQuestion);
+      }
+      else {
+        this.updateQuestionInDatabase(incomingQuestion);
+      }
+    }
+  }
+
+  insertQuestionToDatabase(question: Question): void {
+    this.questionService.create(question).subscribe(
+      newQuestion => {
+        this.quizService.get(this.quizId).subscribe(
+          quiz => {
+            quiz.questions.push(newQuestion.id);
+            this.quizService.update(quiz).subscribe(
+              () => this.getQuiz(),
+              () => console.error('Error during updating quiz question array!')
+            );
+          },
+          () => console.error('Error during adding questionId to Quiz question array!')
+        );
+      },
+      () => console.error('Error during creating question!')
+    );
+  }
+
+  updateQuestionInDatabase(question: Question): void {
+    this.questionService.update(question).subscribe(
+      () => { },
+      () => console.error('Error during updating question!')
     );
   }
 

@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-6 offset-3 mt-5">
-    <form #questionForm="ngForm" (ngSubmit)="setQuestionToDatabase(question)">
+    <form #questionForm="ngForm" (ngSubmit)="saveQuestion(question)">
       <div class="form-group mb-3">
         <label for="title"><b>Question:</b></label>
         <input name="title" id="title" type="text" class="form-control" [(ngModel)]="question.question" required
@@ -12,19 +12,19 @@
         <div class="input-group mb-2 answer-group" *ngFor="let answerIndex of answerNumberArray, let i = index">
           <div class="input-group-prepend">
             <div class="input-group-text">
-              <input type="radio" id="answer-radio-{{i}}" class="answer-radio" name="answers">
+              <input type="radio" id="answer-radio-{{i}}" class="answer-radio" name="answers" required>
             </div>
           </div>
-          <input type="text" class="form-control answers">
+          <input type="text" class="form-control answers" required>
         </div>
       </div>
-      <div class="input-group mb-2" *ngFor="let answer of question.answers, let i = index">
+      <div class="input-group mb-2 answer-group" *ngFor="let answer of question.answers, let i = index">
         <div class="input-group-prepend">
           <div class="input-group-text">
-            <input type="radio" name="answers" [checked]="answer.correct">
+            <input type="radio" name="answers-radio" class="answer-radio" [checked]="answer.correct">
           </div>
         </div>
-        <input type="text" class="form-control" [(ngModel)]="question.answers[i].content"
+        <input type="text" class="form-control answers" [(ngModel)]="question.answers[i].content"
           [name]="question.answers[i].content">
       </div>
       <div class="form-group my-4">

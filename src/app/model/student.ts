@@ -3,5 +3,5 @@ export class Student {
   name: string = '';
   email: string = '';
   points: number = 0;
-  active: boolean = false;
+  active: boolean = true;
 }

@@ -4,7 +4,6 @@ import { Question } from 'src/app/model/question';
 import { QuestionService } from 'src/app/service/question.service';
 import { Location } from '@angular/common';
 import { Answer } from 'src/app/model/answer';
-import { QuizService } from 'src/app/service/quiz.service';
 
 @Component({
   selector: 'app-question-editor',
@@ -22,8 +21,7 @@ export class QuestionEditorComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private questionService: QuestionService,
     private router: Router,
-    private location: Location,
-    private quizService: QuizService,
+    private location: Location
   ) { }
 
   ngOnInit(): void {
@@ -42,42 +40,21 @@ export class QuestionEditorComponent implements OnInit {
     }
   }
 
-  setQuestionToDatabase(question: Question): void {
-    if (question.id === 0) {
-      const answersArray: Answer[] = [];
-      const answersGroups = document.querySelectorAll('.answer-group');
-      answersGroups.forEach((answerGroup, index) => {
-        const radioBtnChecked = (answerGroup.querySelector('.answer-radio') as HTMLInputElement).checked;
-        const answer = (answerGroup.querySelector('.answers') as HTMLInputElement).value;
-        const answerObject = { id: index + 1, content: answer, correct: radioBtnChecked };
-        answersArray.push(answerObject);
-      });
-      question.answers = answersArray;
-      this.questionService.create(question).subscribe(
-        newQuestion => {
-          this.quizService.get(this.quizId).subscribe(
-            quiz => {
-              quiz.questions.push(newQuestion.id);
-              this.quizService.update(quiz).subscribe(
-                () =>
-                  () => console.error('Error during updating quiz question array!')
-              );
-            },
-            () => console.error('Error during adding questionId to Quiz question array!')
-          );
-          this.backToTheQuizEditor();
-        },
-        () => console.error('Error during creating question!')
-      )
-
-    }
-    else {
-    }
-
+  saveQuestion(question: Question): void {
+    const answersArray: Answer[] = [];
+    const answersGroups = document.querySelectorAll('.answer-group');
+    answersGroups.forEach((answerGroup, index) => {
+      const radioBtnChecked = (answerGroup.querySelector('.answer-radio') as HTMLInputElement).checked;
+      const answer = (answerGroup.querySelector('.answers') as HTMLInputElement).value;
+      const answerObject = { id: index + 1, content: answer, correct: radioBtnChecked };
+      answersArray.push(answerObject);
+    });
+    question.answers = answersArray;
+    this.backToTheQuizEditor();
   }
 
   backToTheQuizEditor(): void {
-    this.router.navigate(['admin', 'quiz', `${this.quizId}`]);
+    this.router.navigate(['admin', 'quiz', `${this.quizId}`], { state: this.question });
   }
 
 }
