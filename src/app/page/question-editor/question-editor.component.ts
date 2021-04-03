@@ -4,6 +4,7 @@ import { Question } from 'src/app/model/question';
 import { QuestionService } from 'src/app/service/question.service';
 import { Location } from '@angular/common';
 import { Answer } from 'src/app/model/answer';
+import { TempDataService } from 'src/app/service/temp-data.service';
 
 @Component({
   selector: 'app-question-editor',
@@ -21,7 +22,8 @@ export class QuestionEditorComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private questionService: QuestionService,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private tempDataService: TempDataService
   ) { }
 
   ngOnInit(): void {
@@ -34,6 +36,9 @@ export class QuestionEditorComponent implements OnInit {
 
   getQuestion(): void {
     if (this.questionId === 0) {
+    }
+    else if (this.questionId >= 1000000) {
+      this.question = this.tempDataService.getTempQuestion(this.questionId);
     }
     else {
       this.questionService.get(this.questionId).subscribe(question => this.question = question);

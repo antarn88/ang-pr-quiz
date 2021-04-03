@@ -13,7 +13,7 @@
       <div class="accordion my-3">
         <label for="list"><b>Questions:</b></label>
         <div *ngIf="!quiz.questions.length" class="text-center mb-4">There are no questions yet.</div>
-        <div class="card" *ngFor="let question of quiz.questions | questionIdArrayToQuestionArray">
+        <div class="card" *ngFor="let question of questions">
           <div class="card-header">
             <h2 class="mb-0 d-flex">
               <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target=""

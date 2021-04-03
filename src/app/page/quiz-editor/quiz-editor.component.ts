@@ -4,6 +4,7 @@ import { Question } from 'src/app/model/question';
 import { Quiz } from 'src/app/model/quiz';
 import { QuestionService } from 'src/app/service/question.service';
 import { QuizService } from 'src/app/service/quiz.service';
+import { TempDataService } from 'src/app/service/temp-data.service';
 
 @Component({
   selector: 'app-quiz-editor',
@@ -14,13 +15,15 @@ export class QuizEditorComponent implements OnInit {
 
   quizId: number = 0;
   quiz: Quiz = new Quiz();
+  questions: Question[] = [];
   deletingQuestions: number[] = [];
-
+  
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
     private quizService: QuizService,
     private questionService: QuestionService,
+    private tempDataService: TempDataService
   ) {
     this.receiveIncomingQuestion();
   }
@@ -30,11 +33,19 @@ export class QuizEditorComponent implements OnInit {
     this.getQuiz();
   }
 
-  getQuiz(): void {
+  async getQuiz(): Promise<any> {
     if (this.quizId === 0) {
     }
     else {
-      this.quizService.get(this.quizId).subscribe(quiz => this.quiz = quiz);
+      const quiz = await this.quizService.get(this.quizId).toPromise();
+      this.quiz = quiz;
+      for (let i = 0; i < quiz.questions.length; i++) {
+        const question = await this.questionService.get(quiz.questions[i]).toPromise();
+        this.questions.push(question);
+      }
+      if (this.tempDataService.tempQuestions.length) {
+        this.tempDataService.tempQuestions.forEach(tq => this.questions.push(tq));
+      }
     }
   }
 
@@ -44,14 +55,26 @@ export class QuizEditorComponent implements OnInit {
     const questionHTMLElement = document.querySelector(`#question-${questionId}`)?.parentElement;
     if (questionHTMLElement) questionHTMLElement.outerHTML = '';
     this.deletingQuestions.push(questionId);
+    if (questionId >= 1000000) {
+      this.tempDataService.deleteTempQuestion(questionId);
+    }
   }
 
   backToTheQuizList(): void {
     this.deletingQuestions = [];
     this.router.navigate(['/admin']);
+    this.tempDataService.clearTempQuestions();
   }
 
   setQuizToDatabase(quiz: Quiz): void {
+
+    if (this.tempDataService.tempQuestions.length) {
+      this.tempDataService.tempQuestions.map(tq => {
+        tq.id = 0;
+        this.insertQuestionToDatabase(tq);
+      });
+    }
+
     this.quizService.update(quiz).subscribe(
       () => {
         if (this.deletingQuestions.length) {
@@ -78,10 +101,10 @@ export class QuizEditorComponent implements OnInit {
     const incomingQuestion = navigation?.extras.state as Question;
     if (incomingQuestion?.question) {
       if (incomingQuestion.id === 0) {
-        this.insertQuestionToDatabase(incomingQuestion);
+        incomingQuestion.id = 100000;
+        this.tempDataService.addTempQuestion(incomingQuestion);
       }
       else {
-        this.updateQuestionInDatabase(incomingQuestion);
       }
     }
   }
@@ -109,6 +132,8 @@ export class QuizEditorComponent implements OnInit {
       () => { },
       () => console.error('Error during updating question!')
     );
+
+
   }
 
 }
