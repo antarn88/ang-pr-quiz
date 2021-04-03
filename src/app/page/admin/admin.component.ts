@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
 import { Quiz } from 'src/app/model/quiz';
 import { QuestionService } from 'src/app/service/question.service';
 import { QuizService } from 'src/app/service/quiz.service';
+
 
 @Component({
   selector: 'app-admin',
@@ -11,7 +13,8 @@ import { QuizService } from 'src/app/service/quiz.service';
 })
 export class AdminComponent implements OnInit {
 
-  quizList$: BehaviorSubject<Quiz[]> = this.quizService.list$;
+  quizzes: Quiz[] = [];
+  quizList$: BehaviorSubject<Quiz[]> = new BehaviorSubject<Quiz[]>([]);
   phrase: string = '';
   clickedColumn = 'id';
   sortingDirection = 'ASC';
@@ -20,41 +23,59 @@ export class AdminComponent implements OnInit {
 
   constructor(
     private quizService: QuizService,
-    public questionService: QuestionService
-  ) { }
+    public questionService: QuestionService,
+    private router: Router
+  ) {
+    this.receiveIncomingQuestion();
+  }
 
   ngOnInit(): void {
-    this.quizService.getAll();
+    this.getQuizzes();
   }
 
-  onClickEdit(quiz: Quiz): void {
-  }
-
-  onClickDelete(id: number): void {
-    if (confirm(`Are you sure to delete this quiz with: ${id} ID?`)) {
-      this.quizService.get(id).subscribe(
-        quiz => {
-          this.deletingQuestions = [];
-          this.deletingQuestions = quiz.questions;
-          this.deletingQuestions.forEach(questionId => {
-            this.questionService.remove(questionId).subscribe(
-              () =>
-              () => console.error('Error during deleting question!')
-            );
-          });
-        }
-      );
-      this.quizService.remove(id).subscribe(
-        () => {
-          this.quizService.getAll();
-          this.deletingQuestions = [];
-        },
-        () => console.error("Error during delete quiz!")
-      );
+  receiveIncomingQuestion(): void {
+    const navigation = this.router.getCurrentNavigation();
+    const incomingQuiz = navigation?.extras.state as Quiz;
+    if (incomingQuiz) {
     }
   }
 
-  onClickCreate(): void {
+  async getQuestionFromQuestionId(questionId: number): Promise<string> {
+    const question = await this.questionService.get(questionId).toPromise();
+    return question.question;
+  }
+
+  async getQuizzes(): Promise<any> {
+    this.quizService.getAll();
+    this.quizService.getAllQuizzes();
+    this.quizzes = [];
+    await this.quizService.getAllQuizzes().then(list => {
+      this.quizzes = list;
+      this.quizList$.next(this.quizzes);
+    });
+    this.quizzes.forEach((quiz, quizIndex) => quiz.questions.map((question, questionIndex) => {
+      this.getQuestionFromQuestionId(question).then(data => this.quizzes[quizIndex].questions[questionIndex] = data)
+    }));
+  }
+
+  async onClickDelete(id: number): Promise<any> {
+    if (confirm(`Are you sure to delete this quiz with: ${id} ID?`)) {
+      const quiz = await this.quizService.get(id).toPromise();
+      this.deletingQuestions = [];
+      this.deletingQuestions = quiz.questions;
+
+      const questionService = this.questionService;
+      this.deletingQuestions.forEach(questionId => {
+        async function removeQuestion() {
+          await questionService.remove(questionId).toPromise();
+        }
+        removeQuestion();
+      });
+
+      await this.quizService.remove(id).toPromise();
+      await this.getQuizzes();
+      this.deletingQuestions = [];
+    }
   }
 
   onChangePhrase(event: Event): void {

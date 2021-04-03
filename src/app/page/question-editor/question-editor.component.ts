@@ -45,7 +45,7 @@ export class QuestionEditorComponent implements OnInit {
     }
   }
 
-  saveQuestion(question: Question): void {
+  saveOrCreateQuestion(question: Question): void {
     const answersArray: Answer[] = [];
     const answersGroups = document.querySelectorAll('.answer-group');
     answersGroups.forEach((answerGroup, index) => {
@@ -55,6 +55,7 @@ export class QuestionEditorComponent implements OnInit {
       answersArray.push(answerObject);
     });
     question.answers = answersArray;
+    this.question = question;
     this.backToTheQuizEditor();
   }
 

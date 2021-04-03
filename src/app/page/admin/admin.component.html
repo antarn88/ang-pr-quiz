@@ -16,7 +16,7 @@
     </thead>
     <tbody>
       <tr
-        *ngFor="let quiz of quizList$ | async | quizQuestionsBinding | filter:'title':phrase | sorter:clickedColumn:sortingDirection">
+        *ngFor="let quiz of quizzes | filter:'title':phrase | sorter:clickedColumn:sortingDirection">
         <td>{{ quiz.id }}</td>
         <td>{{ quiz.title }}</td>
         <td>{{ quiz.description }}</td>
@@ -31,7 +31,7 @@
         </td>
         <td class="text-center">
           <div class="btn-group">
-            <button class="btn btn-secondary" (click)="onClickEdit(quiz)" [routerLink]="['quiz/' + quiz.id]">
+            <button class="btn btn-secondary" [routerLink]="['quiz/' + quiz.id]">
               <i class="fa fa-edit"></i>
             </button>
             <button class="btn btn-danger" (click)="onClickDelete(quiz.id || 0)">

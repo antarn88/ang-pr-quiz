@@ -13,8 +13,6 @@ import { HomeComponent } from './page/home/home.component';
 import { NavigationComponent } from './widget/navigation/navigation.component';
 import { FilterPipe } from './pipe/filter.pipe';
 import { SorterPipe } from './pipe/sorter.pipe';
-import { QuizQuestionsBindingPipe } from './pipe/quiz-questions-binding.pipe';
-import { QuestionIdArrayToQuestionArrayPipe } from './pipe/question-id-array-to-question-array.pipe';
 
 @NgModule({
   declarations: [
@@ -26,9 +24,7 @@ import { QuestionIdArrayToQuestionArrayPipe } from './pipe/question-id-array-to-
     HomeComponent,
     NavigationComponent,
     FilterPipe,
-    SorterPipe,
-    QuizQuestionsBindingPipe,
-    QuestionIdArrayToQuestionArrayPipe
+    SorterPipe    
   ],
   imports: [
     BrowserModule,

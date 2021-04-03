@@ -17,7 +17,8 @@ export class QuizEditorComponent implements OnInit {
   quiz: Quiz = new Quiz();
   questions: Question[] = [];
   deletingQuestions: number[] = [];
-  
+  tempQuestionId: number = 1000000;
+
   constructor(
     private router: Router,
     private activatedRoute: ActivatedRoute,
@@ -53,8 +54,11 @@ export class QuizEditorComponent implements OnInit {
     const questionIndex = this.quiz.questions.findIndex(question => question === questionId);
     this.quiz.questions.splice(questionIndex, 1);
     const questionHTMLElement = document.querySelector(`#question-${questionId}`)?.parentElement;
+
     if (questionHTMLElement) questionHTMLElement.outerHTML = '';
+
     this.deletingQuestions.push(questionId);
+
     if (questionId >= 1000000) {
       this.tempDataService.deleteTempQuestion(questionId);
     }
@@ -62,78 +66,73 @@ export class QuizEditorComponent implements OnInit {
 
   backToTheQuizList(): void {
     this.deletingQuestions = [];
-    this.router.navigate(['/admin']);
+    this.router.navigate(['/admin'], { state: this.quiz });
     this.tempDataService.clearTempQuestions();
   }
 
-  setQuizToDatabase(quiz: Quiz): void {
-
+  saveTempQuestionsToDatabase(quizId: number): void {
     if (this.tempDataService.tempQuestions.length) {
       this.tempDataService.tempQuestions.map(tq => {
         tq.id = 0;
-        this.insertQuestionToDatabase(tq);
+        this.insertQuestionToDatabase(tq, quizId);
       });
     }
+  }
 
-    this.quizService.update(quiz).subscribe(
-      () => {
-        if (this.deletingQuestions.length) {
-          this.deletingQuestions.forEach(deletingQuestionId => {
-            this.questionService.get(deletingQuestionId).subscribe(
-              () => {
-                this.questionService.remove(deletingQuestionId).subscribe(
-                  () =>
-                    () => console.error('Error during deleting question!')
-                );
-              },
-              () => console.error('You want to delete a question that does not exist!')
-            );
-          });
-        }
-        this.backToTheQuizList();
-      },
-      () => console.error('Error during updating quiz!')
-    );
+  async setQuizToDatabase(quiz: Quiz): Promise<any> {
+    if (quiz.id === 0) {
+      const newQuiz = await this.quizService.create(quiz).toPromise();
+      this.saveTempQuestionsToDatabase(newQuiz.id);
+    }
+    else {
+      this.saveTempQuestionsToDatabase(quiz.id);
+      await this.quizService.update(quiz).toPromise();
+
+      if (this.deletingQuestions.length) {
+        this.deletingQuestions.forEach(deletingQuestionId => {
+
+          const questionService = this.questionService;
+          async function innerFunction() {
+            await questionService.get(deletingQuestionId).toPromise();
+
+            if (deletingQuestionId < 1000000) {
+              await questionService.remove(deletingQuestionId).toPromise();
+            }
+          }
+          innerFunction();
+        });
+      }
+    }
+    this.backToTheQuizList();
   }
 
   receiveIncomingQuestion(): void {
     const navigation = this.router.getCurrentNavigation();
     const incomingQuestion = navigation?.extras.state as Question;
+
     if (incomingQuestion?.question) {
       if (incomingQuestion.id === 0) {
-        incomingQuestion.id = 100000;
+        incomingQuestion.id = this.tempQuestionId++;
         this.tempDataService.addTempQuestion(incomingQuestion);
       }
       else {
+        this.updateQuestionInDatabase(incomingQuestion);
       }
     }
   }
 
-  insertQuestionToDatabase(question: Question): void {
-    this.questionService.create(question).subscribe(
-      newQuestion => {
-        this.quizService.get(this.quizId).subscribe(
-          quiz => {
-            quiz.questions.push(newQuestion.id);
-            this.quizService.update(quiz).subscribe(
-              () => this.getQuiz(),
-              () => console.error('Error during updating quiz question array!')
-            );
-          },
-          () => console.error('Error during adding questionId to Quiz question array!')
-        );
-      },
-      () => console.error('Error during creating question!')
-    );
+  async insertQuestionToDatabase(question: Question, quizId: number): Promise<any> {
+    const newQuestion = await this.questionService.create(question).toPromise();
+    const quiz = await this.quizService.get(quizId).toPromise();
+    quiz.questions.push(newQuestion.id);
+    await this.quizService.update(quiz).toPromise();
+    this.getQuiz();
   }
 
-  updateQuestionInDatabase(question: Question): void {
-    this.questionService.update(question).subscribe(
-      () => { },
-      () => console.error('Error during updating question!')
-    );
-
-
+  async updateQuestionInDatabase(question: Question): Promise<any> {
+    if (question.id < 1000000) {
+      await this.questionService.update(question).toPromise();
+    }
   }
 
 }

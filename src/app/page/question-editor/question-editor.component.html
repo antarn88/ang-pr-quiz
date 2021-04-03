@@ -1,6 +1,6 @@
 <div class="row">
   <div class="col-6 offset-3 mt-5">
-    <form #questionForm="ngForm" (ngSubmit)="saveQuestion(question)">
+    <form #questionForm="ngForm" (ngSubmit)="saveOrCreateQuestion(question)">
       <div class="form-group mb-3">
         <label for="title"><b>Question:</b></label>
         <input name="title" id="title" type="text" class="form-control" [(ngModel)]="question.question" required
