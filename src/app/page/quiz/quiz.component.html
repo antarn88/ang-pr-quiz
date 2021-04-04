@@ -7,7 +7,7 @@
         </div>
         <div class="question-card bg-light p-5">
           <div class="question mb-4">
-            <h4>{{ (currentQuestion$ | async)?.question }}</h4>
+            <h5>{{ (currentQuestion$ | async)?.question }}</h5>
           </div>
           <div class="answers" *ngIf="(currentQuestion$ | async)?.answers as answers">
             <div class="answer" *ngFor="let answer of answers, let i = index">

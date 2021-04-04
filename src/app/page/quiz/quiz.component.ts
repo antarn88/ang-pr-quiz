@@ -145,7 +145,7 @@ export class QuizComponent implements OnInit, AfterViewChecked {
   }
 
   getPercentFromResults(): number {
-    return this.correctAnswers * 100 / this.quizQuestionsAsNumbers.length;
+    return Math.floor(this.correctAnswers * 100 / this.quizQuestionsAsNumbers.length);
   }
 
 }
