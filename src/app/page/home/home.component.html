@@ -1,11 +1,11 @@
 <div class="row my-5">
-  <div class="col-12 text-center" *ngIf="(quizList$ | async)?.length">
+  <div class="col-12 text-center" *ngIf="(activeQuizList$ | async)?.length">
     <h1>Choose a quiz</h1>
   </div>
 </div>
 <div class="row">
   <div class="col-12 d-flex flex-wrap justify-content-around">
-    <div class="card bg-light" style="width: 18rem;" *ngFor="let quiz of quizList$ | async">
+    <div class="card bg-light" style="width: 18rem;" *ngFor="let quiz of activeQuizList$ | async">
       <div class="card-body">
         <h5 class="card-title">{{ quiz.title }}</h5>
         <p class="card-text">{{ quiz.description }}</p>
