@@ -16,13 +16,13 @@
     </thead>
     <tbody>
       <tr
-        *ngFor="let quiz of quizzes | filter:'title':phrase | sorter:clickedColumn:sortingDirection">
+        *ngFor="let quiz of quizListWithQuestions$ | async | filter:'title':phrase | sorter:clickedColumn:sortingDirection">
         <td>{{ quiz.id }}</td>
         <td>{{ quiz.title }}</td>
         <td>{{ quiz.description }}</td>
         <td>
-          <li *ngFor="let questionId of quiz.questions">
-            <span>{{ questionId }}</span>
+          <li *ngFor="let question of quiz.questions">
+            <span>{{ question.question }}</span>
           </li>
         </td>
         <td>

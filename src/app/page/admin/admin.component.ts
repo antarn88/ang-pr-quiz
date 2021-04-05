@@ -15,6 +15,7 @@ export class AdminComponent implements OnInit {
 
   quizzes: Quiz[] = [];
   quizList$: BehaviorSubject<Quiz[]> = new BehaviorSubject<Quiz[]>([]);
+  quizListWithQuestions$: BehaviorSubject<Quiz[]> = this.quizService.listWithQuestions$;
   phrase: string = '';
   clickedColumn = 'id';
   sortingDirection = 'ASC';
@@ -26,36 +27,18 @@ export class AdminComponent implements OnInit {
     public questionService: QuestionService,
     private router: Router
   ) {
-    this.receiveIncomingQuestion();
+    this.receiveIncomingQuiz();
   }
 
   ngOnInit(): void {
-    this.getQuizzes();
+    this.quizService.getAllWithQuestions();
   }
 
-  receiveIncomingQuestion(): void {
+  receiveIncomingQuiz(): void {
     const navigation = this.router.getCurrentNavigation();
     const incomingQuiz = navigation?.extras.state as Quiz;
     if (incomingQuiz) {
     }
-  }
-
-  async getQuestionFromQuestionId(questionId: number): Promise<string> {
-    const question = await this.questionService.get(questionId).toPromise();
-    return question.question;
-  }
-
-  async getQuizzes(): Promise<any> {
-    this.quizService.getAll();
-    this.quizService.getAllQuizzes();
-    this.quizzes = [];
-    await this.quizService.getAllQuizzes().then(list => {
-      this.quizzes = list;
-      this.quizList$.next(this.quizzes);
-    });
-    this.quizzes.forEach((quiz, quizIndex) => quiz.questions.map((question, questionIndex) => {
-      this.getQuestionFromQuestionId(question).then(data => this.quizzes[quizIndex].questions[questionIndex] = data)
-    }));
   }
 
   async onClickDelete(id: number): Promise<any> {
@@ -73,7 +56,7 @@ export class AdminComponent implements OnInit {
       });
 
       await this.quizService.remove(id).toPromise();
-      await this.getQuizzes();
+      this.quizService.getAllWithQuestions();
       this.deletingQuestions = [];
     }
   }
