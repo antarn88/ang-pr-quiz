@@ -72,24 +72,55 @@ export class QuizEditorComponent implements OnInit {
     this.tempDataService.clearTempQuestions();
   }
 
-  saveTempQuestionsToDatabase(quizId: number): void {
-    if (this.tempDataService.tempQuestions.length) {
-      this.tempDataService.tempQuestions.map(async tq => {
-        tq.id = 0;
-        await this.insertQuestionToDatabase(tq, quizId);
-      });
-    }
+  addQuestionToQuizObject(questionId: number): void {
+    this.quiz.questions.push(questionId);
+  }
+
+  async saveTempQuestionsToDatabase(): Promise<any> {
+    this.tempDataService.tempQuestions.map(async tq => {
+      tq.id = 0;
+      await this.questionService.create(tq).toPromise().then(
+        newQuestion => {
+          this.quiz.questions.push(newQuestion.id);
+        }
+      );
+    });
+  }
+
+  async updateQuiz(quiz: Quiz): Promise<any> {
+    await this.quizService.update(quiz).toPromise();
   }
 
   async setQuizToDatabase(quiz: Quiz): Promise<any> {
     if (quiz.id === 0) {
-      const newQuiz: Quiz = await this.quizService.create(quiz).toPromise();
-      this.saveTempQuestionsToDatabase(newQuiz.id);
+      await this.quizService.create(quiz).toPromise();
+      this.saveTempQuestionsToDatabase();
     }
     else {
-      this.saveTempQuestionsToDatabase(quiz.id);
-      this.deleteQuestionFromDatabase();
-      this.backToTheQuizList();
+      if (this.tempDataService.tempQuestions.length) {
+        const createAndStoreQuestions = this.tempDataService.tempQuestions.map(async tq => {
+          tq.id = 0;
+          await this.questionService.create(tq).toPromise()
+            .then(newQuestion => this.quiz.questions.push(newQuestion.id));
+        });
+
+        Promise.all(createAndStoreQuestions)
+          .then(
+            () => this.updateQuiz(this.quiz))
+          .then(
+            () => {
+              this.tempDataService.clearTempQuestions();
+              this.deleteQuestionFromDatabase();
+            })
+          .then(
+            () => { }
+          );
+      } else {
+        this.deleteQuestionFromDatabase()
+          .then(
+            () => { }
+          );
+      }
     }
   }
 
@@ -108,12 +139,9 @@ export class QuizEditorComponent implements OnInit {
     }
   }
 
-  async insertQuestionToDatabase(question: Question, quizId: number): Promise<any> {
+  async insertQuestionToDatabase(question: Question): Promise<any> {
     const newQuestion: Question = await this.questionService.create(question).toPromise();
-    this.questions.push(newQuestion);
     this.quiz.questions.push(newQuestion.id);
-    this.updateQuiz(this.quiz);
-    this.getQuiz();
   }
 
   async updateQuestionInDatabase(question: Question): Promise<any> {
@@ -122,29 +150,35 @@ export class QuizEditorComponent implements OnInit {
     }
   }
 
-  async deleteQuestionFromDatabase(): Promise<void> {
+  async deleteQuestionFromDatabase(): Promise<any> {
     if (this.deletingQuestions.length) {
-
-      this.deletingQuestions.forEach(async deletingQuestionId => {
+      this.deletingQuestions.map(async deletingQuestionId => {
         if (deletingQuestionId < 1000000) {
-
-          await this.questionService.get(deletingQuestionId).toPromise().then(
-            async question => {
+          const getQuestion = this.questionService.get(deletingQuestionId).toPromise();
+          getQuestion
+            .then(question => {
               if (question.id === deletingQuestionId) {
-                await this.questionService.remove(deletingQuestionId).toPromise();
-                this.questions = this.questions.filter(question => question.id !== deletingQuestionId);
-                this.quiz.questions = this.quiz.questions.filter(questionId => questionId !== deletingQuestionId);
-                this.updateQuiz(this.quiz);
+                const removeQuestion = this.questionService.remove(deletingQuestionId).toPromise();
+                removeQuestion
+                  .then(
+                    () => {
+                      this.questions = this.questions.filter(question => question.id !== deletingQuestionId);
+                      this.quiz.questions = this.quiz.questions.filter(questionId => questionId !== deletingQuestionId);
+                    })
+                  .then(
+                    () => this.updateQuiz(this.quiz))
+                  .then(
+                    () => this.backToTheQuizList()
+                  );
               }
             }
-          );
+            );
         }
       });
     }
-  }
-
-  async updateQuiz(quiz: Quiz): Promise<any> {
-    await this.quizService.update(quiz).toPromise();
+    else {
+      this.backToTheQuizList();
+    }
   }
 
 }
