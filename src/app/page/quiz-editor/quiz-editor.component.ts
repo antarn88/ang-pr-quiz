@@ -24,7 +24,7 @@ export class QuizEditorComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private quizService: QuizService,
     private questionService: QuestionService,
-    private tempDataService: TempDataService
+    public tempDataService: TempDataService
   ) {
     this.receiveIncomingQuestion();
   }
@@ -34,14 +34,17 @@ export class QuizEditorComponent implements OnInit {
     this.getQuiz();
   }
 
-  async getQuiz(): Promise<any> {
+  async getQuiz(): Promise<void> {
     if (this.quizId === 0) {
+      if (this.tempDataService.tempQuestions.length) {
+        this.tempDataService.tempQuestions.forEach(tq => this.questions.push(tq));
+      }
     }
     else {
-      const quiz: Quiz = await this.quizService.get(this.quizId).toPromise();
+      const quiz = await this.quizService.get(this.quizId).toPromise();
       this.quiz = quiz;
       for (let i = 0; i < quiz.questions.length; i++) {
-        const question: Question = await this.questionService.get(quiz.questions[i]).toPromise();
+        const question = await this.questionService.get(quiz.questions[i]).toPromise();
         this.questions.push(question);
       }
       if (this.tempDataService.tempQuestions.length) {
@@ -52,20 +55,16 @@ export class QuizEditorComponent implements OnInit {
 
   deleteQuestion(questionId: number): void {
     const questionIndex = this.questions.findIndex(question => question.id === questionId);
-
     this.questions.splice(questionIndex, 1);
     const questionHTMLElement = document.querySelector(`#question-${questionId}`)?.parentElement;
-
     if (questionHTMLElement) questionHTMLElement.outerHTML = '';
-
     this.deletingQuestions.push(questionId);
-
     if (questionId >= 1000000) {
       this.tempDataService.deleteTempQuestion(questionId);
     }
   }
 
-  async backToTheQuizList(): Promise<any> {
+  backToTheQuizList(): void {
     this.quizService.listWithQuestions$.next([]);
     this.deletingQuestions = [];
     this.router.navigate(['/admin'], { state: this.quiz });
@@ -76,50 +75,35 @@ export class QuizEditorComponent implements OnInit {
     this.quiz.questions.push(questionId);
   }
 
-  async saveTempQuestionsToDatabase(): Promise<any> {
-    this.tempDataService.tempQuestions.map(async tq => {
+  async saveTempQuestionsToDatabase(): Promise<void> {
+    for (let i = 0; i < this.tempDataService.tempQuestions.length; i++) {
+      const tq = this.tempDataService.tempQuestions[i];
       tq.id = 0;
-      await this.questionService.create(tq).toPromise().then(
-        newQuestion => {
-          this.quiz.questions.push(newQuestion.id);
-        }
-      );
-    });
+      const newQuestion = await this.questionService.create(tq).toPromise();
+      this.quiz.questions.push(newQuestion.id);
+    }
   }
 
-  async updateQuiz(quiz: Quiz): Promise<any> {
+  async updateQuiz(quiz: Quiz): Promise<void> {
     await this.quizService.update(quiz).toPromise();
   }
 
-  async setQuizToDatabase(quiz: Quiz): Promise<any> {
+  async setQuizToDatabase(quiz: Quiz): Promise<void> {
     if (quiz.id === 0) {
+      this.storeTempDataForNewQuiz();
+      await this.saveTempQuestionsToDatabase();
       await this.quizService.create(quiz).toPromise();
-      this.saveTempQuestionsToDatabase();
+      this.tempDataService.clearTempQuestions();
+      this.deleteQuestionFromDatabase();
     }
     else {
       if (this.tempDataService.tempQuestions.length) {
-        const createAndStoreQuestions = this.tempDataService.tempQuestions.map(async tq => {
-          tq.id = 0;
-          await this.questionService.create(tq).toPromise()
-            .then(newQuestion => this.quiz.questions.push(newQuestion.id));
-        });
-
-        Promise.all(createAndStoreQuestions)
-          .then(
-            () => this.updateQuiz(this.quiz))
-          .then(
-            () => {
-              this.tempDataService.clearTempQuestions();
-              this.deleteQuestionFromDatabase();
-            })
-          .then(
-            () => { }
-          );
+        await this.saveTempQuestionsToDatabase();
+        await this.updateQuiz(this.quiz);
+        this.tempDataService.clearTempQuestions();
+        this.deleteQuestionFromDatabase();
       } else {
-        this.deleteQuestionFromDatabase()
-          .then(
-            () => { }
-          );
+        this.deleteQuestionFromDatabase();
       }
     }
   }
@@ -150,35 +134,28 @@ export class QuizEditorComponent implements OnInit {
     }
   }
 
-  async deleteQuestionFromDatabase(): Promise<any> {
+  async deleteQuestionFromDatabase(): Promise<void> {
     if (this.deletingQuestions.length) {
-      this.deletingQuestions.map(async deletingQuestionId => {
+      for (let i = 0; i < this.deletingQuestions.length; i++) {
+        const deletingQuestionId = this.deletingQuestions[i];
         if (deletingQuestionId < 1000000) {
-          const getQuestion = this.questionService.get(deletingQuestionId).toPromise();
-          getQuestion
-            .then(question => {
-              if (question.id === deletingQuestionId) {
-                const removeQuestion = this.questionService.remove(deletingQuestionId).toPromise();
-                removeQuestion
-                  .then(
-                    () => {
-                      this.questions = this.questions.filter(question => question.id !== deletingQuestionId);
-                      this.quiz.questions = this.quiz.questions.filter(questionId => questionId !== deletingQuestionId);
-                    })
-                  .then(
-                    () => this.updateQuiz(this.quiz))
-                  .then(
-                    () => this.backToTheQuizList()
-                  );
-              }
-            }
-            );
+          await this.questionService.remove(deletingQuestionId).toPromise();
+          this.questions = this.questions.filter(question => question.id !== deletingQuestionId);
+          this.quiz.questions = this.quiz.questions.filter(questionId => questionId !== deletingQuestionId);
+          await this.updateQuiz(this.quiz);
         }
-      });
+      }
+      this.backToTheQuizList();
     }
     else {
       this.backToTheQuizList();
     }
+  }
+
+  storeTempDataForNewQuiz(): void {
+    this.quiz.title = this.tempDataService.newQuizTempTitle;
+    this.quiz.description = this.tempDataService.newQuizTempDescription;
+    this.tempDataService.deleteNewQuizTempData();
   }
 
 }

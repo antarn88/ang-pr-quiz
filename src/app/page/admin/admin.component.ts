@@ -4,7 +4,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Quiz } from 'src/app/model/quiz';
 import { QuestionService } from 'src/app/service/question.service';
 import { QuizService } from 'src/app/service/quiz.service';
-
+import { TempDataService } from 'src/app/service/temp-data.service';
 
 @Component({
   selector: 'app-admin',
@@ -25,7 +25,8 @@ export class AdminComponent implements OnInit {
   constructor(
     private quizService: QuizService,
     public questionService: QuestionService,
-    private router: Router
+    private router: Router,
+    private tempDataService: TempDataService
   ) {
     this.receiveIncomingQuiz();
   }
@@ -41,20 +42,14 @@ export class AdminComponent implements OnInit {
     }
   }
 
-  async onClickDelete(id: number): Promise<any> {
-    if (confirm(`Are you sure to delete this quiz with: ${id} ID?`)) {
+  async onClickDelete(id: number): Promise<void> {
+    if (confirm(`Are you sure to delete this quiz (ID: ${id}) with all its questions?`)) {
       const quiz = await this.quizService.get(id).toPromise();
-      this.deletingQuestions = [];
       this.deletingQuestions = quiz.questions;
-
-      const questionService = this.questionService;
-      this.deletingQuestions.forEach(questionId => {
-        async function removeQuestion() {
-          await questionService.remove(questionId).toPromise();
-        }
-        removeQuestion();
-      });
-
+      for (let i = 0; i < this.deletingQuestions.length; i++) {
+        const questionId = this.deletingQuestions[i];
+        await this.questionService.remove(questionId).toPromise();
+      }
       await this.quizService.remove(id).toPromise();
       this.quizService.getAllWithQuestions();
       this.deletingQuestions = [];
@@ -72,6 +67,11 @@ export class AdminComponent implements OnInit {
       this.firstSorting = false;
     }
     else this.sortingDirection = this.sortingDirection === 'ASC' ? 'DESC' : 'ASC';
+  }
+
+  onClickNewQuiz(): string[] {
+    this.tempDataService.deleteNewQuizTempData();
+    return ['quiz/0'];
   }
 
 }

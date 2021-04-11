@@ -3,5 +3,5 @@ export class Quiz {
   title: string = '';
   description: string = '';
   questions: any[] = [];
-  active: boolean = false;
+  active: boolean = true;
 }

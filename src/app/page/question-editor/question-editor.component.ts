@@ -34,14 +34,14 @@ export class QuestionEditorComponent implements OnInit {
     this.getQuestion();
   }
 
-  getQuestion(): void {
+  async getQuestion(): Promise<void> {
     if (this.questionId === 0) {
     }
     else if (this.questionId >= 1000000) {
       this.question = this.tempDataService.getTempQuestion(this.questionId);
     }
     else {
-      this.questionService.get(this.questionId).subscribe(question => this.question = question);
+      this.question = await this.questionService.get(this.questionId).toPromise();
     }
   }
 

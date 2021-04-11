@@ -8,6 +8,8 @@ export class TempDataService {
 
   tempId: number = 1000000
   tempQuestions: Question[] = [];
+  newQuizTempTitle: string = '';
+  newQuizTempDescription: string = '';
 
   constructor() { }
 
@@ -26,5 +28,10 @@ export class TempDataService {
 
   deleteTempQuestion(questionId: number): void {
     this.tempQuestions = this.tempQuestions.filter(tq => !(tq.id === questionId));
+  }
+
+  deleteNewQuizTempData(): void {
+    this.newQuizTempTitle = '';
+    this.newQuizTempDescription = '';
   }
 }

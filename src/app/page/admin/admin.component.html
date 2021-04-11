@@ -2,7 +2,7 @@
   <div class="col-4 offset-4 my-5">
     <input type="text" class="form-control" placeholder="Search" (keyup)="onChangePhrase($event)">
   </div>
-  <button class="btn btn-primary btn-block btn-lg mb-5" [routerLink]="['quiz/' + 0]">Create a new quiz</button>
+  <button class="btn btn-primary btn-block btn-lg mb-5" [routerLink]="onClickNewQuiz()">Create a new quiz</button>
   <table class="table table-striped mb-5">
     <thead>
       <tr>
