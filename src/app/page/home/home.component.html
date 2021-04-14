@@ -5,7 +5,7 @@
 </div>
 <div class="row">
   <div class="col-12 d-flex flex-wrap justify-content-around">
-    <div class="card bg-light" style="width: 18rem;" *ngFor="let quiz of activeQuizList$ | async">
+    <div class="card bg-light mb-5" style="width: 18rem;" *ngFor="let quiz of activeQuizList$ | async">
       <div class="card-body">
         <h5 class="card-title">{{ quiz.title }}</h5>
         <p class="card-text">{{ quiz.description }}</p>

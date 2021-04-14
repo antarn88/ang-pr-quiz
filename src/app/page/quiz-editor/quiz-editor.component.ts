@@ -158,4 +158,8 @@ export class QuizEditorComponent implements OnInit {
     this.tempDataService.deleteNewQuizTempData();
   }
 
+  isValidForm(): boolean {
+    return this.questions.length ? true : false;
+  }
+
 }
