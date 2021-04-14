@@ -3,3 +3,19 @@ th {
   cursor: pointer;
   user-select: none;
 }
+
+td {
+  word-break: break-word;
+}
+
+th:nth-child(2) {
+  width: 20%;
+}
+
+th:nth-child(3) {
+  width: 40%;
+}
+
+th:nth-child(4) {
+  width: 50%;
+}

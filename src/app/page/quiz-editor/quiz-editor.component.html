@@ -67,7 +67,8 @@
       <div class="d-flex mb-5">
         <button class="btn btn-secondary btn-block w-50 mr-1" type="button" (click)="backToTheQuizList()"><i
             class="fa fa-arrow-left"></i> Cancel</button>
-        <button [disabled]="quizForm.invalid" type="submit" class="btn btn-primary w-50"><i class="fa fa-save"></i>
+        <button [disabled]="quizForm.invalid || !isValidForm()" type="submit" class="btn btn-primary w-50"><i
+            class="fa fa-save"></i>
           Save</button>
       </div>
     </form>
