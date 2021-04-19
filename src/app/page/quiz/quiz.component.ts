@@ -1,7 +1,7 @@
 import { AfterViewChecked, Component, OnInit } from '@angular/core';
-import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
+import { concatMap } from 'rxjs/operators';
 import { Question } from 'src/app/model/question';
 import { Quiz } from 'src/app/model/quiz';
 import { QuestionService } from 'src/app/service/question.service';
@@ -16,17 +16,17 @@ import { TempDataService } from 'src/app/service/temp-data.service';
 export class QuizComponent implements OnInit, AfterViewChecked {
 
   quizList$ = this.quizService.list$;
-  quizId: number = 0;
+  quizId = 0;
   quiz: Quiz = new Quiz();
   quizQuestionsAsNumbers: number[] = [];
   questionList$: BehaviorSubject<Question[]> = new BehaviorSubject<Question[]>([]);
   currentQuestion$: BehaviorSubject<Question> = new BehaviorSubject<Question>(new Question());
-  numberOfQuestion: number = 1;
-  selectedAnswer: number = 0;
-  finishedQuiz: boolean = false;
-  checkedAnswer: boolean = false;
-  points: number = 0;
-  correctAnswers: number = 0;
+  numberOfQuestion = 1;
+  selectedAnswer = 0;
+  finishedQuiz = false;
+  checkedAnswer = false;
+  points = 0;
+  correctAnswers = 0;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -41,7 +41,11 @@ export class QuizComponent implements OnInit, AfterViewChecked {
 
   async ngOnInit(): Promise<void> {
     this.questionList$.next([]);
-    this.activatedRoute.params.subscribe(params => this.quizId = Number(params.id))
+
+    this.activatedRoute.params.pipe(
+      concatMap(async params => this.quizId = Number(params.id))
+    ).toPromise();
+
     this.quizService.getAll();
     await this.setQuiz();
     this.setQuizQuestionsAsNumbers();
@@ -85,9 +89,8 @@ export class QuizComponent implements OnInit, AfterViewChecked {
     const isActiveQuestion = async (questionId: number): Promise<boolean> => {
       const question = await this.questionService.get(questionId).toPromise();
       return question.active ? true : false;
-    }
-    for (let i = 0; i < this.quizQuestionsAsNumbers.length; i++) {
-      const questionId = this.quizQuestionsAsNumbers[i];
+    };
+    for (const questionId of this.quizQuestionsAsNumbers) {
       const questionIndexInArray = this.quizQuestionsAsNumbers.findIndex(qId => questionId === qId);
       if (!await isActiveQuestion(questionId)) {
         this.quizQuestionsAsNumbers.splice(questionIndexInArray, 1);
@@ -106,7 +109,7 @@ export class QuizComponent implements OnInit, AfterViewChecked {
     }
   }
 
-  async jumpToTheNextQuestion(form: NgForm): Promise<void> {
+  async jumpToTheNextQuestion(): Promise<void> {
     this.numberOfQuestion++;
     const question = this.currentQuestion$.getValue();
     const nextButton = document.querySelector('.next-button') as HTMLElement;
@@ -130,7 +133,7 @@ export class QuizComponent implements OnInit, AfterViewChecked {
   }
 
   checkRadioBoxes(): void {
-    const radioButtons = document.querySelectorAll("input[type=radio]");
+    const radioButtons = document.querySelectorAll('input[type=radio]');
     radioButtons.forEach(rb => {
       const radioButton = (rb as HTMLElement);
       radioButton.addEventListener('click', () => {

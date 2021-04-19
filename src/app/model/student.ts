@@ -1,7 +1,7 @@
 export class Student {
-  id: number = 0;
-  name: string = '';
-  email: string = '';
-  points: number = 0;
-  active: boolean = true;
+  id = 0;
+  name = '';
+  email = '';
+  points = 0;
+  active = true;
 }

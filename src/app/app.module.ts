@@ -24,7 +24,7 @@ import { SorterPipe } from './pipe/sorter.pipe';
     HomeComponent,
     NavigationComponent,
     FilterPipe,
-    SorterPipe    
+    SorterPipe
   ],
   imports: [
     BrowserModule,

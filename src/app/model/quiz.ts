@@ -1,7 +1,7 @@
 export class Quiz {
-  id: number = 0;
-  title: string = '';
-  description: string = '';
+  id = 0;
+  title = '';
+  description = '';
   questions: any[] = [];
-  active: boolean = true;
+  active = true;
 }

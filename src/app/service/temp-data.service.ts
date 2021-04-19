@@ -6,10 +6,10 @@ import { Question } from '../model/question';
 })
 export class TempDataService {
 
-  tempId: number = 1000000
+  tempId = 1000000;
   tempQuestions: Question[] = [];
-  newQuizTempTitle: string = '';
-  newQuizTempDescription: string = '';
+  newQuizTempTitle = '';
+  newQuizTempDescription = '';
 
   constructor() { }
 

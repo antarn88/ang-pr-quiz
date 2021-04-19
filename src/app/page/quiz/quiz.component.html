@@ -1,5 +1,5 @@
 <div class="quiz-container">
-  <form #questionForm="ngForm" (ngSubmit)="jumpToTheNextQuestion(questionForm)">
+  <form #questionForm="ngForm" (ngSubmit)="jumpToTheNextQuestion()">
     <div class="row">
       <div class="col-8 offset-2" *ngIf="(currentQuestion$ | async)?.id !== 0">
         <div class="points text-right text-info h5">Your points: {{ points }}</div>

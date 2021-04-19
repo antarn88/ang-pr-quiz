@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { QuizService } from 'src/app/service/quiz.service';
-import { map } from 'rxjs/operators';
+import { concatMap, map } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 import { Quiz } from 'src/app/model/quiz';
 
@@ -18,8 +18,10 @@ export class HomeComponent implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.quizService.getAll();
-    const activeQuizzes$ = this.quizList$.pipe(map(quizlist => quizlist.filter(quizlist => quizlist.active)));
-    activeQuizzes$.subscribe(activeQuizzes => this.activeQuizList$.next(activeQuizzes));
+    this.quizList$.pipe(
+      map(quizlist => quizlist.filter(ql => ql.active)),
+      concatMap(async activeQuizzes => this.activeQuizList$.next(activeQuizzes))
+    ).toPromise();
   }
 
 }

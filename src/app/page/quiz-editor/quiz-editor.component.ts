@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { concatMap } from 'rxjs/operators';
 import { Question } from 'src/app/model/question';
 import { Quiz } from 'src/app/model/quiz';
 import { QuestionService } from 'src/app/service/question.service';
@@ -13,11 +14,11 @@ import { TempDataService } from 'src/app/service/temp-data.service';
 })
 export class QuizEditorComponent implements OnInit {
 
-  quizId: number = 0;
+  quizId = 0;
   quiz: Quiz = new Quiz();
   questions: Question[] = [];
   deletingQuestions: number[] = [];
-  tempQuestionId: number = 1000000;
+  tempQuestionId = 1000000;
 
   constructor(
     private router: Router,
@@ -30,7 +31,9 @@ export class QuizEditorComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.activatedRoute.params.subscribe(params => this.quizId = Number(params.id));
+    this.activatedRoute.params.pipe(
+      concatMap(async params => this.quizId = Number(params.id))
+    ).toPromise();
     this.getQuiz();
   }
 
@@ -43,8 +46,8 @@ export class QuizEditorComponent implements OnInit {
     else {
       const quiz = await this.quizService.get(this.quizId).toPromise();
       this.quiz = quiz;
-      for (let i = 0; i < quiz.questions.length; i++) {
-        const question = await this.questionService.get(quiz.questions[i]).toPromise();
+      for (const questionId of quiz.questions) {
+        const question = await this.questionService.get(questionId).toPromise();
         this.questions.push(question);
       }
       if (this.tempDataService.tempQuestions.length) {
@@ -57,7 +60,7 @@ export class QuizEditorComponent implements OnInit {
     const questionIndex = this.questions.findIndex(question => question.id === questionId);
     this.questions.splice(questionIndex, 1);
     const questionHTMLElement = document.querySelector(`#question-${questionId}`)?.parentElement;
-    if (questionHTMLElement) questionHTMLElement.outerHTML = '';
+    if (questionHTMLElement) { questionHTMLElement.outerHTML = ''; }
     this.deletingQuestions.push(questionId);
     if (questionId >= 1000000) {
       this.tempDataService.deleteTempQuestion(questionId);
@@ -76,8 +79,7 @@ export class QuizEditorComponent implements OnInit {
   }
 
   async saveTempQuestionsToDatabase(): Promise<void> {
-    for (let i = 0; i < this.tempDataService.tempQuestions.length; i++) {
-      const tq = this.tempDataService.tempQuestions[i];
+    for (const tq of this.tempDataService.tempQuestions) {
       tq.id = 0;
       const newQuestion = await this.questionService.create(tq).toPromise();
       this.quiz.questions.push(newQuestion.id);
@@ -136,8 +138,7 @@ export class QuizEditorComponent implements OnInit {
 
   async deleteQuestionFromDatabase(): Promise<void> {
     if (this.deletingQuestions.length) {
-      for (let i = 0; i < this.deletingQuestions.length; i++) {
-        const deletingQuestionId = this.deletingQuestions[i];
+      for (const deletingQuestionId of this.deletingQuestions) {
         if (deletingQuestionId < 1000000) {
           await this.questionService.remove(deletingQuestionId).toPromise();
           this.questions = this.questions.filter(question => question.id !== deletingQuestionId);
@@ -148,6 +149,7 @@ export class QuizEditorComponent implements OnInit {
       this.backToTheQuizList();
     }
     else {
+      this.updateQuiz(this.quiz);
       this.backToTheQuizList();
     }
   }

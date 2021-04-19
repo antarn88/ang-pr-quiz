@@ -16,7 +16,7 @@ export class AdminComponent implements OnInit {
   quizzes: Quiz[] = [];
   quizList$: BehaviorSubject<Quiz[]> = new BehaviorSubject<Quiz[]>([]);
   quizListWithQuestions$: BehaviorSubject<Quiz[]> = this.quizService.listWithQuestions$;
-  phrase: string = '';
+  phrase = '';
   clickedColumn = 'id';
   sortingDirection = 'ASC';
   firstSorting = true;
@@ -46,8 +46,7 @@ export class AdminComponent implements OnInit {
     if (confirm(`Are you sure to delete this quiz (ID: ${id}) with all its questions?`)) {
       const quiz = await this.quizService.get(id).toPromise();
       this.deletingQuestions = quiz.questions;
-      for (let i = 0; i < this.deletingQuestions.length; i++) {
-        const questionId = this.deletingQuestions[i];
+      for (const questionId of this.deletingQuestions) {
         await this.questionService.remove(questionId).toPromise();
       }
       await this.quizService.remove(id).toPromise();
@@ -66,7 +65,7 @@ export class AdminComponent implements OnInit {
       this.sortingDirection = 'DESC';
       this.firstSorting = false;
     }
-    else this.sortingDirection = this.sortingDirection === 'ASC' ? 'DESC' : 'ASC';
+    else { this.sortingDirection = this.sortingDirection === 'ASC' ? 'DESC' : 'ASC'; }
   }
 
   onClickNewQuiz(): string[] {

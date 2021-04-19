@@ -6,7 +6,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 export class FilterPipe implements PipeTransform {
 
   transform(value: any, key: string, phrase: string | number | boolean): Array<any> {
-    if (!Array.isArray(value) || !key || !phrase) return value;
+    if (!Array.isArray(value) || !key || !phrase) { return value; }
 
     phrase = typeof phrase === 'number' ? phrase : ('' + phrase).toLowerCase();
 

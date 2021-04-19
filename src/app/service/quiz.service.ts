@@ -23,8 +23,7 @@ export class QuizService extends BaseService<Quiz> {
   async getAllWithQuestions(): Promise<void> {
     this.listWithQuestions$.next([]);
     const quizList = await this.http.get<Quiz[]>(`${this.serverAddress}/${this.entityName}`).toPromise();
-    for (let i = 0; i < quizList.length; i++) {
-      const quiz = quizList[i];
+    for (const quiz of quizList) {
       const quizQuestions: Question[] = [];
       const questionFromQuestionId = async (questionId: number) => await this.questionService.get(questionId).toPromise();
       for (let j = 0; j < quiz.questions.length; j++) {

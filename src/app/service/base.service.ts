@@ -7,8 +7,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class BaseService<T extends { id: number }> {
 
-  serverAddress: string = 'http://localhost:3000';
-  entityName: string = '';
+  serverAddress = 'http://localhost:3000';
+  entityName = '';
   list$: BehaviorSubject<T[]> = new BehaviorSubject<T[]>([]);
 
   constructor(
@@ -18,12 +18,10 @@ export class BaseService<T extends { id: number }> {
     this.entityName = entityName;
   }
 
-  getAll(): void {
+  async getAll(): Promise<void> {
     this.list$.next([]);
-    this.http.get<T[]>(`${this.serverAddress}/${this.entityName}`).subscribe(
-      list => this.list$.next(list),
-      error => console.error(error)
-    );
+    const list = await this.http.get<T[]>(`${this.serverAddress}/${this.entityName}`).toPromise();
+    this.list$.next(list);
   }
 
   get(id: number): Observable<T> {

@@ -1,9 +1,9 @@
-import { Answer } from "./answer";
+import { Answer } from './answer';
 
 export class Question {
-  id: number = 0;
-  question: string = '';
+  id = 0;
+  question = '';
   answers: Answer[] = [];
-  points: number = 1;
-  active: boolean = true;
+  points = 1;
+  active = true;
 }

@@ -5,6 +5,7 @@ import { QuestionService } from 'src/app/service/question.service';
 import { Location } from '@angular/common';
 import { Answer } from 'src/app/model/answer';
 import { TempDataService } from 'src/app/service/temp-data.service';
+import { concatMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-question-editor',
@@ -13,11 +14,11 @@ import { TempDataService } from 'src/app/service/temp-data.service';
 })
 export class QuestionEditorComponent implements OnInit, AfterContentChecked {
 
-  questionId: number = 0;
+  questionId = 0;
   question: Question = new Question();
-  quizId: number = 0;
+  quizId = 0;
   answerNumberArray: number[] = [0, 1, 2, 3];
-  selectedRadio: boolean = false;
+  selectedRadio = false;
   backupQuestion: Question = new Question();
 
   constructor(
@@ -35,10 +36,13 @@ export class QuestionEditorComponent implements OnInit, AfterContentChecked {
   }
 
   async ngOnInit(): Promise<void> {
-    this.quizId = Number(this.location.path().split("/question")[0].split("/")
-    [this.location.path().split("/question")[0].split("/").length - 1]);
+    this.quizId = Number(this.location.path().split('/question')[0].split('/')
+    [this.location.path().split('/question')[0].split('/').length - 1]);
 
-    this.activatedRoute.params.subscribe(params => this.questionId = Number(params.id));
+    this.activatedRoute.params.pipe(
+      concatMap(async params => this.questionId = Number(params.id))
+    ).toPromise();
+
     await this.getQuestion();
     this.backupQuestion = JSON.parse(JSON.stringify({ ...this.question }));
   }
